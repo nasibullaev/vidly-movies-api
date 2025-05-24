@@ -2,7 +2,7 @@ const Joi = require("joi");
 const { unique, max } = require("joi/lib/types/array");
 const mongoose = require("mongoose");
 
-const userSchema = new Mongoose.schema({
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     minlength: 2,
@@ -24,7 +24,7 @@ const userSchema = new Mongoose.schema({
   },
 });
 
-const User = mongoose.Model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 function validateUser(user) {
   const schema = {
@@ -36,4 +36,4 @@ function validateUser(user) {
 }
 
 exports.User = User;
-exports.validateUser = validate;
+exports.validate = validateUser;
