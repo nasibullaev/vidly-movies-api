@@ -1,3 +1,7 @@
+const config = require("config");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const _ = require("lodash");
 const { User, validate } = require("../models/user");
 const mongoose = require("mongoose");
 const express = require("express");
@@ -14,15 +18,17 @@ router.post("/", async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const { name, email, password } = req.body;
+  let { name, email, password } = req.body;
 
   let user = await User.findOne({ email });
   if (user) return res.status(400).send("User already registered");
-
+  const salt = await bcrypt.genSalt(10);
+  password = await bcrypt.hash(password, salt);
   user = new User({ name, email, password });
 
   await user.save();
-  res.send(user);
+  const token = jwt.sign({ _id: user._id }, config.get("jwtPrivateKey"));
+  res.header("x-auth-token", token).send(_.pick(user, ["name", "email"]));
 });
 
 // Edit user details
@@ -39,12 +45,12 @@ router.put("/:id", async (req, res) => {
   );
 
   if (!user) return res.status(404).send("User not found");
-  res.send(user);
+  res.send(_.pick(user, ["name", "email"]));
 });
 
 // Delete a user
 router.delete("/:id", async (req, res) => {
-  const user = await User.findByIdAndRemove(req.params.id);
+  const user = await User.findByIdAndDelete(req.params.id);
   if (!user) return res.status(404).send("User not found with given id");
   res.send(user);
 });
@@ -60,7 +66,7 @@ router.get("/:id", async (req, res) => {
   const user = await User.findById(id);
   if (!user) return res.status(404).send("User not found");
 
-  res.send(user);
+  res.send(_.pick(user, ["name", "email"]));
 });
 
 module.exports = router;
