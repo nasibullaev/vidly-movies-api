@@ -12,7 +12,7 @@ A RESTful API built with Node.js and Express for managing a movie rental service
 - 🔐 User registration & authentication with JWT
 - 📜 Input validation using Joi
 - 🛡️ Route protection with middleware
-- 🧪 Basic unit tests (if implemented)
+- 🧪 Basic unit tests
 - 📂 Clean MVC project structure
 
 ## 🧰 Tech Stack
