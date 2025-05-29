@@ -3,3 +3,4 @@ config/
 hash.js
 objectId.js
 logfile.log
+exceptions.log
