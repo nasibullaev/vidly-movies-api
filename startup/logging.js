@@ -1,5 +1,5 @@
 const winston = require("winston");
-require("winston-mongodb");
+//require("winston-mongodb");
 require("express-async-errors");
 module.exports = function () {
   process.on("unhandledRejection", (ex) => {
@@ -14,7 +14,7 @@ module.exports = function () {
     ),
     transports: [
       new winston.transports.File({ filename: "logfile.log" }),
-      new winston.transports.MongoDB({ db: "mongodb://localhost/vidly" }),
+      //new winston.transports.MongoDB({ db: "mongodb://localhost/vidly" }),
       new winston.transports.Console(),
     ],
     exceptionHandlers: [
