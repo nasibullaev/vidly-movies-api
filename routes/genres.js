@@ -35,7 +35,7 @@ router.put("/:id", async (req, res) => {
   if (!genre)
     return res.status(404).send("The genre with the given ID was not found.");
 
-  res.send(genre);
+  res.status(200).send(genre);
 });
 
 router.delete("/:id", [auth, admin], async (req, res) => {
