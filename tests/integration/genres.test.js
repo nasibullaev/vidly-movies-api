@@ -5,12 +5,12 @@ const mongoose = require("mongoose");
 let server;
 
 describe("api/genres", () => {
-  beforeEach(() => {
+  beforeAll(() => {
     server = require("../../index");
   });
-  afterEach(async () => {
-    await server.close();
+  afterAll(async () => {
     await Genre.deleteMany({});
+    await server.close();
   });
   describe("GET /", () => {
     it("should return all genres", async () => {
