@@ -30,7 +30,11 @@ describe("api/returns", () => {
   it("should return 401 if customer is not logged in", async () => {
     const res = await request(server)
       .post("/api/returns")
-      .send(customerId, movieId);
+      .send({ customerId, movieId });
     expect(res.status).toBe(401);
+  });
+  it("should return 400 if customerID is not provided", async () => {
+    const res = await request(server).post("/api/returns").send(movieId);
+    expect(res.status).toBe(400);
   });
 });
