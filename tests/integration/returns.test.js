@@ -1,14 +1,24 @@
 const request = require("supertest");
 const { Rental } = require("../../models/rental");
+const { User } = require("../../models/user");
 const mongoose = require("mongoose");
 const { result } = require("lodash");
 describe("api/returns", () => {
   let server;
-  let rental, customerId, movieId;
-  beforeAll(async () => {
-    server = require("../../index");
+  let rental, customerId, movieId, token;
+  const exec = () => {
+    return request(server)
+      .post("/api/returns")
+      .set("x-auth-token", token)
+      .send({ customerId, movieId });
+  };
+  beforeEach(async () => {
     customerId = new mongoose.Types.ObjectId();
     movieId = new mongoose.Types.ObjectId();
+    token = new User().generateAuthToken();
+  });
+  beforeAll(async () => {
+    server = require("../../index");
     rental = new Rental({
       customer: {
         _id: customerId,
@@ -28,13 +38,27 @@ describe("api/returns", () => {
     await Rental.deleteMany({});
   });
   it("should return 401 if customer is not logged in", async () => {
-    const res = await request(server)
-      .post("/api/returns")
-      .send({ customerId, movieId });
+    token = "";
+    const res = await exec();
     expect(res.status).toBe(401);
   });
   it("should return 400 if customerID is not provided", async () => {
-    const res = await request(server).post("/api/returns").send(movieId);
+    customerId = "";
+    const res = await exec();
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if movieID is not provided", async () => {
+    movieId = "";
+    const res = await exec();
+    expect(res.status).toBe(400);
+  });
+  it("should return 404 if no rental found for this customer/movie", async () => {
+    await Rental.deleteMany({});
+    const res = await exec();
+    expect(res.status).toBe(404);
+  });
+  it("should return 400 if rental already processed", async () => {
+    const res = await exec();
     expect(res.status).toBe(400);
   });
 });
