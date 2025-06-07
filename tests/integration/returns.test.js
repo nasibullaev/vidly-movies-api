@@ -16,9 +16,6 @@ describe("api/returns", () => {
     customerId = new mongoose.Types.ObjectId();
     movieId = new mongoose.Types.ObjectId();
     token = new User().generateAuthToken();
-  });
-  beforeAll(async () => {
-    server = require("../../index");
     rental = new Rental({
       customer: {
         _id: customerId,
@@ -33,7 +30,10 @@ describe("api/returns", () => {
     });
     await rental.save();
   });
-  afterAll(async () => {
+  beforeAll(async () => {
+    server = require("../../index");
+  });
+  afterEach(async () => {
     await server.close();
     await Rental.deleteMany({});
   });
@@ -57,7 +57,9 @@ describe("api/returns", () => {
     const res = await exec();
     expect(res.status).toBe(404);
   });
-  it("should return 400 if rental already processed", async () => {
+  it("should return 400 if return is already processed", async () => {
+    rental.dateReturned = new Date();
+    await rental.save();
     const res = await exec();
     expect(res.status).toBe(400);
   });
