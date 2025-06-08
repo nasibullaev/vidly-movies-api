@@ -2,7 +2,8 @@ const validateObjectId = require("../middleware/validateObjectId");
 require("express-async-errors");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
-const { Genre, validate } = require("../models/genre");
+const validate = require("../middleware/validate");
+const { Genre, validateGenre } = require("../models/genre");
 const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
@@ -12,21 +13,16 @@ router.get("/", async (req, res) => {
   res.status(200).send(genres);
 });
 
-router.post("/", auth, async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post("/", [auth, validate(validateGenre)], async (req, res) => {
   let genre = new Genre({ name: req.body.name });
   genre = await genre.save();
 
   res.send(genre);
 });
 
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", [auth, validate(validateGenre)], async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id))
     return res.status(404).send("Invalid ID");
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
 
   const genre = await Genre.findByIdAndUpdate(
     req.params.id,
