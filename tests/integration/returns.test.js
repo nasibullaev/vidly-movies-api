@@ -1,8 +1,8 @@
+const moment = require("moment");
 const request = require("supertest");
 const { Rental } = require("../../models/rental");
 const { User } = require("../../models/user");
 const mongoose = require("mongoose");
-const { result } = require("lodash");
 describe("api/returns", () => {
   let server;
   let rental, customerId, movieId, token;
@@ -62,5 +62,24 @@ describe("api/returns", () => {
     await rental.save();
     const res = await exec();
     expect(res.status).toBe(400);
+  });
+  it("should return 200 if input is valid", async () => {
+    const res = await exec();
+    expect(res.status).toBe(200);
+  });
+  it("should set the returnDate if input is valid", async () => {
+    const res = await exec();
+    const rentalInDb = await Rental.findById(rental._id);
+    const diff = new Date() - rentalInDb.dateReturned;
+    expect(diff).toBeLessThan(10 * 1000);
+  });
+  it("should set the rentalFee if input is valid", async () => {
+    rental.dateOut = moment().add(-7, "days").toDate();
+    await rental.save();
+
+    const res = await exec();
+
+    const rentalInDb = await Rental.findById(rental._id);
+    expect(rentalInDb.rentalFee).toBe(14);
   });
 });
